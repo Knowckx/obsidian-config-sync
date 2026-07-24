@@ -1,5 +1,7 @@
 <script lang="ts">
+import { Button } from 'infa-s5';
 import {
+  openSyncBackupDir,
   SyncResultStatus,
   type SyncResult,
   type SyncResultItem,
@@ -10,6 +12,8 @@ type Props = {
 };
 
 let { result = null }: Props = $props();
+let openingBackup = $state(false);
+let backupError = $state('');
 
 const countStatus = (items: SyncResultItem[], status: SyncResultStatus) => {
   return items.filter((item) => item.status === status).length;
@@ -27,6 +31,22 @@ const statusLabel = (status: SyncResultStatus) => {
     return '覆盖成功';
   }
   return '失败';
+};
+
+const openBackup = async () => {
+  if (!result?.backupPath) {
+    return;
+  }
+
+  openingBackup = true;
+  backupError = '';
+  try {
+    await openSyncBackupDir(result.backupPath);
+  } catch (err) {
+    backupError = err instanceof Error ? err.message : String(err);
+  } finally {
+    openingBackup = false;
+  }
 };
 </script>
 
@@ -55,6 +75,21 @@ const statusLabel = (status: SyncResultStatus) => {
         <span>失败</span>
       </div>
     </div>
+
+    {#if result.backupPath}
+      <div class="backup-card">
+        <div class="backup-context">
+          <strong>同步前备份已创建</strong>
+          <span title={result.backupPath}>{result.backupPath}</span>
+        </div>
+        <Button onclick={openBackup} disabled={openingBackup}>
+          {openingBackup ? '正在打开…' : '打开备份目录'}
+        </Button>
+      </div>
+      {#if backupError}
+        <p class="backup-error">{backupError}</p>
+      {/if}
+    {/if}
 
     <div class="target-list">
       {#each result.targets as target (target.vaultPath)}
@@ -150,6 +185,33 @@ const statusLabel = (status: SyncResultStatus) => {
   }
 
   .error-summary strong {
+    color: var(--color-danger);
+  }
+
+  .backup-card {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    align-items: center;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+    background: var(--color-surface-muted);
+  }
+
+  .backup-context {
+    display: grid;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+
+  .backup-context span {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    overflow-wrap: anywhere;
+  }
+
+  .backup-error {
     color: var(--color-danger);
   }
 
@@ -283,6 +345,10 @@ const statusLabel = (status: SyncResultStatus) => {
     }
 
     .target-header {
+      display: grid;
+    }
+
+    .backup-card {
       display: grid;
     }
 

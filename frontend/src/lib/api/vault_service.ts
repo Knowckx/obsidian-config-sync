@@ -56,6 +56,7 @@ export type TargetSyncResult = {
 };
 
 export type SyncResult = {
+  backupPath: string;
   targets: TargetSyncResult[];
 };
 
@@ -69,6 +70,10 @@ export const listConfigItems = (vaultPath: string): Promise<ConfigItem[]> => {
 
 export const openVaultConfigDir = (vaultPath: string): Promise<void> => {
   return VaultService.OpenVaultConfigDir(vaultPath);
+};
+
+export const openSyncBackupDir = (backupPath: string): Promise<void> => {
+  return VaultService.OpenSyncBackupDir(backupPath);
 };
 
 export const resetTestCases = (): Promise<void> => {

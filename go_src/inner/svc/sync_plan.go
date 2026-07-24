@@ -27,6 +27,9 @@ func (s *VaultService) BuildSyncPlan(req SyncRequest) (SyncPlan, error) {
 		if path == "" {
 			return SyncPlan{}, errors.New("同步配置路径不能为空")
 		}
+		if err := precheckSyncPath(path); err != nil {
+			return SyncPlan{}, err
+		}
 		if _, exists := selectedPathSet[path]; exists {
 			continue
 		}

@@ -185,10 +185,14 @@ export class SyncRequest {
  * SyncResult 描述一次同步的执行结果。
  */
 export class SyncResult {
+    "backupPath": string;
     "targets": TargetSyncResult[];
 
     /** Creates a new SyncResult instance. */
     constructor($$source: Partial<SyncResult> = {}) {
+        if (!("backupPath" in $$source)) {
+            this["backupPath"] = "";
+        }
         if (!("targets" in $$source)) {
             this["targets"] = [];
         }
@@ -200,10 +204,10 @@ export class SyncResult {
      * Creates a new SyncResult instance from a string or object.
      */
     static createFrom($$source: any = {}): SyncResult {
-        const $$createField0_0 = $$createType4;
+        const $$createField1_0 = $$createType4;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("targets" in $$parsedSource) {
-            $$parsedSource["targets"] = $$createField0_0($$parsedSource["targets"]);
+            $$parsedSource["targets"] = $$createField1_0($$parsedSource["targets"]);
         }
         return new SyncResult($$parsedSource as Partial<SyncResult>);
     }

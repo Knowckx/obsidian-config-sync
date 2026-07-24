@@ -3,8 +3,10 @@ package svc
 import (
 	"io"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/cockroachdb/errors"
@@ -17,15 +19,26 @@ func (t *VaultService) ExecuteSyncPlan(plan SyncPlan) (SyncResult, error) {
 	}
 	defer t.isSyncing.Store(false)
 
-	mainVaultPath, targetVaultPaths, err := precheckSyncPlan(plan)
+	currentPlan, err := t.rebuildSyncPlan(plan)
 	if err != nil {
 		return SyncResult{}, errors.WithStack(err)
 	}
+	if !reflect.DeepEqual(plan, currentPlan) {
+		return SyncResult{}, errors.New("同步计划已变化，请重新确认")
+	}
 
-	result := SyncResult{Targets: make([]TargetSyncResult, 0, len(plan.Targets))}
-	for i, target := range plan.Targets {
+	backupPath, err := createSyncBackup(currentPlan)
+	if err != nil {
+		return SyncResult{}, errors.Wrap(err, "创建同步备份失败")
+	}
+
+	result := SyncResult{
+		BackupPath: backupPath,
+		Targets:    make([]TargetSyncResult, 0, len(currentPlan.Targets)),
+	}
+	for _, target := range currentPlan.Targets {
 		targetResult := TargetSyncResult{
-			VaultPath: targetVaultPaths[i],
+			VaultPath: target.VaultPath,
 			Items:     make([]SyncResultItem, 0, len(target.Items)),
 		}
 
@@ -34,8 +47,8 @@ func (t *VaultService) ExecuteSyncPlan(plan SyncPlan) (SyncResult, error) {
 				Path:   item.Path,
 				Status: resultStatusForAction(item.Action),
 			}
-			src := filepath.Join(mainVaultPath, ".obsidian", filepath.FromSlash(item.Path))
-			dst := filepath.Join(targetVaultPaths[i], ".obsidian", filepath.FromSlash(item.Path))
+			src := filepath.Join(currentPlan.MainVaultPath, ".obsidian", filepath.FromSlash(item.Path))
+			dst := filepath.Join(target.VaultPath, ".obsidian", filepath.FromSlash(item.Path))
 			if err := copySyncItem(src, dst); err != nil {
 				resultItem.Status = SyncResultStatusFailed
 				resultItem.Error = errors.Wrapf(err, "同步配置失败: %s", item.Path).Error()
@@ -44,36 +57,44 @@ func (t *VaultService) ExecuteSyncPlan(plan SyncPlan) (SyncResult, error) {
 		}
 		result.Targets = append(result.Targets, targetResult)
 	}
+	if backupPath != "" {
+		if err := pruneSyncBackups(filepath.Dir(backupPath), syncBackupKeepCount); err != nil {
+			log.Printf("清理旧同步备份失败: %+v", err)
+		}
+	}
 	return result, nil
 }
 
-// precheckSyncPlan 校验执行计划并返回规范化的 vault 路径。
-func precheckSyncPlan(plan SyncPlan) (string, []string, error) {
-	mainVaultPath, err := precheckVaultPath(plan.MainVaultPath)
-	if err != nil {
-		return "", nil, err
+// rebuildSyncPlan 根据待执行计划重新生成当前计划。
+func (t *VaultService) rebuildSyncPlan(plan SyncPlan) (SyncPlan, error) {
+	if len(plan.Targets) == 0 {
+		return SyncPlan{}, errors.New("同步目标不能为空")
+	}
+	if len(plan.Targets[0].Items) == 0 {
+		return SyncPlan{}, errors.New("同步配置项不能为空")
 	}
 
 	targetVaultPaths := make([]string, 0, len(plan.Targets))
+	targetPathSet := make(map[string]struct{}, len(plan.Targets))
 	for _, target := range plan.Targets {
-		targetVaultPath, err := precheckVaultPath(target.VaultPath)
-		if err != nil {
-			return "", nil, err
+		targetPath := strings.ToLower(filepath.Clean(target.VaultPath))
+		if _, exists := targetPathSet[targetPath]; exists {
+			return SyncPlan{}, errors.Errorf("同步目标重复: %s", target.VaultPath)
 		}
-		if samePath(mainVaultPath, targetVaultPath) {
-			return "", nil, errors.Errorf("主库不能作为从库: %s", targetVaultPath)
-		}
-		for _, item := range target.Items {
-			if item.Action != SyncPlanActionCreate && item.Action != SyncPlanActionOverwrite {
-				return "", nil, errors.Errorf("无效的同步动作: %s", item.Action)
-			}
-			if err := precheckSyncPath(item.Path); err != nil {
-				return "", nil, err
-			}
-		}
-		targetVaultPaths = append(targetVaultPaths, targetVaultPath)
+		targetPathSet[targetPath] = struct{}{}
+		targetVaultPaths = append(targetVaultPaths, target.VaultPath)
 	}
-	return mainVaultPath, targetVaultPaths, nil
+
+	selectedPaths := make([]string, 0, len(plan.Targets[0].Items))
+	for _, item := range plan.Targets[0].Items {
+		selectedPaths = append(selectedPaths, item.Path)
+	}
+
+	return t.BuildSyncPlan(SyncRequest{
+		MainVaultPath:    plan.MainVaultPath,
+		TargetVaultPaths: targetVaultPaths,
+		SelectedPaths:    selectedPaths,
+	})
 }
 
 // resultStatusForAction 将计划动作转换为成功时的结果状态。

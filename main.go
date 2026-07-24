@@ -24,6 +24,8 @@ func main() {
 		windowsOptions.AdditionalBrowserArgs = []string{"--remote-debugging-port=9222"}
 	}
 
+	var mainWindow *application.WebviewWindow
+
 	// Create a new Wails application by providing the necessary options.
 	// Variables 'Name' and 'Description' are for application metadata.
 	// 'Assets' configures the asset server with the 'FS' variable pointing to the frontend files.
@@ -38,6 +40,17 @@ func main() {
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
+		},
+		SingleInstance: &application.SingleInstanceOptions{
+			UniqueID: "app.obsi-conf-sync.desktop",
+			ExitCode: 0,
+			OnSecondInstanceLaunch: func(_ application.SecondInstanceData) {
+				if mainWindow == nil {
+					return
+				}
+				mainWindow.Restore()
+				mainWindow.Focus()
+			},
 		},
 		Windows: windowsOptions,
 		Mac: application.MacOptions{
@@ -58,7 +71,7 @@ func main() {
 	// 'Mac' options tailor the window when running on macOS.
 	// 'BackgroundColour' is the background colour of the window.
 	// 'URL' is the URL that will be loaded into the webview.
-	app.Window.NewWithOptions(application.WebviewWindowOptions{
+	mainWindow = app.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:           "Window 1",
 		Width:           windowWidth,
 		Height:          windowHeight,

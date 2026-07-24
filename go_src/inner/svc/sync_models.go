@@ -41,7 +41,8 @@ type TargetSyncPlan struct {
 
 // SyncResult 描述一次同步的执行结果。
 type SyncResult struct {
-	Targets []TargetSyncResult `json:"targets"`
+	BackupPath string             `json:"backupPath"`
+	Targets    []TargetSyncResult `json:"targets"`
 }
 
 // SyncResultStatus 描述单个同步项的最终结果。

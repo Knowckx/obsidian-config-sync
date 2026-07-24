@@ -42,6 +42,13 @@ export function ListConfigItems(vaultPath: string): $CancellablePromise<$models.
 }
 
 /**
+ * OpenSyncBackupDir 使用系统文件管理器打开完整同步备份目录。
+ */
+export function OpenSyncBackupDir(backupPath: string): $CancellablePromise<void> {
+    return $Call.ByID(63541684, backupPath);
+}
+
+/**
  * OpenVaultConfigDir 使用系统文件管理器打开 vault 的 .obsidian 配置目录。
  */
 export function OpenVaultConfigDir(vaultPath: string): $CancellablePromise<void> {
