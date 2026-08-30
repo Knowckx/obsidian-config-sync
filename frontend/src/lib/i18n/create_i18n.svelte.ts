@@ -1,3 +1,5 @@
+// 2026-08-30 国际化功能已冻结，暂时不要继续开发或接入业务。
+
 type MessageTable = Record<string, string>;
 type MessageCatalog = Record<string, MessageTable>;
 type TranslationParam = string | number;

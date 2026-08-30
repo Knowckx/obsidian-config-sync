@@ -33,7 +33,7 @@ func main() {
 	// 'Mac' options tailor the application when running an macOS.
 	app := application.New(application.Options{
 		Name:        "obsi-conf-sync",
-		Description: "A demo of using raw HTML & CSS",
+		Description: "同步多个 Obsidian 库的配置",
 		Services: []application.Service{
 			application.NewService(&svc.VaultService{}),
 			application.NewService(&svc.DevService{}),
@@ -72,7 +72,7 @@ func main() {
 	// 'BackgroundColour' is the background colour of the window.
 	// 'URL' is the URL that will be loaded into the webview.
 	mainWindow = app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:           "Window 1",
+		Title:           "Obsidian 配置同步",
 		Width:           windowWidth,
 		Height:          windowHeight,
 		MinWidth:        900,

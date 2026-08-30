@@ -1,3 +1,5 @@
+// 2026-08-30 国际化功能已冻结，暂时不要继续开发或接入业务。
+
 const zhMessages = {
   'common.finish': '完成',
   'common.next': '下一步',
