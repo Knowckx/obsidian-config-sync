@@ -3,7 +3,6 @@ package svc
 import (
 	"io"
 	"io/fs"
-	"log"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -27,10 +26,12 @@ func (t *VaultService) ExecuteSyncPlan(plan SyncPlan) (SyncResult, error) {
 		return SyncResult{}, errors.New("同步计划已变化，请重新确认")
 	}
 
-	backupPath, err := createSyncBackup(currentPlan)
-	if err != nil {
-		return SyncResult{}, errors.Wrap(err, "创建同步备份失败")
-	}
+	backupPath := ""
+	// 2026-08-30 备份功能已冻结，暂时停止实际调用。
+	// backupPath, err = createSyncBackup(currentPlan)
+	// if err != nil {
+	// 	return SyncResult{}, errors.Wrap(err, "创建同步备份失败")
+	// }
 
 	result := SyncResult{
 		BackupPath: backupPath,
@@ -57,11 +58,12 @@ func (t *VaultService) ExecuteSyncPlan(plan SyncPlan) (SyncResult, error) {
 		}
 		result.Targets = append(result.Targets, targetResult)
 	}
-	if backupPath != "" {
-		if err := pruneSyncBackups(filepath.Dir(backupPath), syncBackupKeepCount); err != nil {
-			log.Printf("清理旧同步备份失败: %+v", err)
-		}
-	}
+	// 2026-08-30 备份功能已冻结，暂时停止实际调用。
+	// if backupPath != "" {
+	// 	if err := pruneSyncBackups(filepath.Dir(backupPath), syncBackupKeepCount); err != nil {
+	// 		log.Printf("清理旧同步备份失败: %+v", err)
+	// 	}
+	// }
 	return result, nil
 }
 

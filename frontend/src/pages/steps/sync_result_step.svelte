@@ -1,7 +1,7 @@
 <script lang="ts">
-import { Button } from 'infa-s5';
+// import { Button } from 'infa-s5';
 import {
-  openSyncBackupDir,
+  // openSyncBackupDir,
   SyncResultStatus,
   type SyncResult,
   type SyncResultItem,
@@ -12,8 +12,9 @@ type Props = {
 };
 
 let { result = null }: Props = $props();
-let openingBackup = $state(false);
-let backupError = $state('');
+// 2026-08-30 备份功能已冻结，暂时停止实际调用。
+// let openingBackup = $state(false);
+// let backupError = $state('');
 
 const countStatus = (items: SyncResultItem[], status: SyncResultStatus) => {
   return items.filter((item) => item.status === status).length;
@@ -33,21 +34,21 @@ const statusLabel = (status: SyncResultStatus) => {
   return '失败';
 };
 
-const openBackup = async () => {
-  if (!result?.backupPath) {
-    return;
-  }
-
-  openingBackup = true;
-  backupError = '';
-  try {
-    await openSyncBackupDir(result.backupPath);
-  } catch (err) {
-    backupError = err instanceof Error ? err.message : String(err);
-  } finally {
-    openingBackup = false;
-  }
-};
+// const openBackup = async () => {
+//   if (!result?.backupPath) {
+//     return;
+//   }
+//
+//   openingBackup = true;
+//   backupError = '';
+//   try {
+//     await openSyncBackupDir(result.backupPath);
+//   } catch (err) {
+//     backupError = err instanceof Error ? err.message : String(err);
+//   } finally {
+//     openingBackup = false;
+//   }
+// };
 </script>
 
 <div class="step-content">
@@ -76,20 +77,23 @@ const openBackup = async () => {
       </div>
     </div>
 
-    {#if result.backupPath}
-      <div class="backup-card">
-        <div class="backup-context">
-          <strong>同步前备份已创建</strong>
-          <span title={result.backupPath}>{result.backupPath}</span>
+    <!-- 2026-08-30 备份功能已冻结，暂时不展示备份路径和打开入口。 -->
+    <!--
+      {#if result.backupPath}
+        <div class="backup-card">
+          <div class="backup-context">
+            <strong>同步前备份已创建</strong>
+            <span title={result.backupPath}>{result.backupPath}</span>
+          </div>
+          <Button onclick={openBackup} disabled={openingBackup}>
+            {openingBackup ? '正在打开…' : '打开备份目录'}
+          </Button>
         </div>
-        <Button onclick={openBackup} disabled={openingBackup}>
-          {openingBackup ? '正在打开…' : '打开备份目录'}
-        </Button>
-      </div>
-      {#if backupError}
-        <p class="backup-error">{backupError}</p>
+        {#if backupError}
+          <p class="backup-error">{backupError}</p>
+        {/if}
       {/if}
-    {/if}
+    -->
 
     <div class="target-list">
       {#each result.targets as target (target.vaultPath)}
@@ -188,6 +192,7 @@ const openBackup = async () => {
     color: var(--color-danger);
   }
 
+  /* 2026-08-30 备份功能已冻结。
   .backup-card {
     display: flex;
     justify-content: space-between;
@@ -214,6 +219,7 @@ const openBackup = async () => {
   .backup-error {
     color: var(--color-danger);
   }
+  */
 
   .target-card {
     overflow: hidden;
@@ -348,9 +354,11 @@ const openBackup = async () => {
       display: grid;
     }
 
+    /*
     .backup-card {
       display: grid;
     }
+    */
 
     .target-summary {
       flex-wrap: wrap;

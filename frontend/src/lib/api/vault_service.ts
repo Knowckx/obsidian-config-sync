@@ -72,9 +72,10 @@ export const openVaultConfigDir = (vaultPath: string): Promise<void> => {
   return VaultService.OpenVaultConfigDir(vaultPath);
 };
 
-export const openSyncBackupDir = (backupPath: string): Promise<void> => {
-  return VaultService.OpenSyncBackupDir(backupPath);
-};
+// 2026-08-30 备份功能已冻结，暂时停止实际调用。
+// export const openSyncBackupDir = (backupPath: string): Promise<void> => {
+//   return VaultService.OpenSyncBackupDir(backupPath);
+// };
 
 export const resetTestCases = (): Promise<void> => {
   return DevService.ResetTestCases();
