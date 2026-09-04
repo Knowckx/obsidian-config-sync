@@ -64,6 +64,14 @@ export const scanVaults = (root: string): Promise<VaultInfo[]> => {
   return VaultService.ScanVaults(root);
 };
 
+export const getLastVaultRoot = (): Promise<string> => {
+  return VaultService.GetLastVaultRoot();
+};
+
+export const saveLastVaultRoot = (root: string): Promise<void> => {
+  return VaultService.SaveLastVaultRoot(root);
+};
+
 export const listConfigItems = (vaultPath: string): Promise<ConfigItem[]> => {
   return VaultService.ListConfigItems(vaultPath);
 };

@@ -1,8 +1,10 @@
 <script lang="ts">
+import { onMount } from 'svelte';
 import { Button } from 'infa-s5';
 import {
   buildSyncPlan,
   executeSyncPlan,
+  getLastVaultRoot,
   removeDirectory,
   resetTestCases,
   scanVaults,
@@ -61,6 +63,8 @@ let syncing = $state(false);
 let executeError = $state('');
 let devPresetError = $state('');
 let devTestRoot = $state<string | null>(null);
+let initializing = $state(true);
+let restoreError = $state('');
 
 let currentStep = $derived(steps[stepIndex]!);
 let canBack = $derived(stepIndex > 0 && !syncing);
@@ -83,6 +87,37 @@ const setScannedVaults = (selectedRoot: string, foundVaults: VaultInfo[]) => {
   }
   vaults = [...vaultMap.values()];
 };
+
+// 启动时重新扫描上次加载成功的目录，避免使用可能过期的 Vault 列表。
+const restoreLastVaultRoot = async () => {
+  try {
+    const lastRoot = await getLastVaultRoot();
+    if (!lastRoot) {
+      return;
+    }
+
+    root = lastRoot;
+    const foundVaults = await scanVaults(lastRoot);
+    if (foundVaults.length === 0) {
+      restoreError = '上次选择的目录中未发现 Vault，请重新选择。';
+      return;
+    }
+    setScannedVaults(lastRoot, foundVaults);
+  } catch (err) {
+    restoreError = `上次选择的目录不可用，请重新选择：${err instanceof Error ? err.message : String(err)}`;
+  } finally {
+    initializing = false;
+  }
+};
+
+const handleScannedVaults = (selectedRoot: string, foundVaults: VaultInfo[]) => {
+  restoreError = '';
+  setScannedVaults(selectedRoot, foundVaults);
+};
+
+onMount(() => {
+  void restoreLastVaultRoot();
+});
 
 const setMainVault = (vault: VaultInfo) => {
   mainVault = vault;
@@ -261,6 +296,9 @@ function getCanNext(): boolean {
             {#if devPresetError}
               <p class="status-error dev-preset-error">{devPresetError}</p>
             {/if}
+            {#if restoreError}
+              <p class="status-error restore-error">{restoreError}</p>
+            {/if}
 
             <!-- <section class="step-body">：页面区块已由 Section 负责。 -->
             <div class="step-body">
@@ -268,7 +306,8 @@ function getCanNext(): boolean {
                 <ScanVaults
                   {root}
                   {vaults}
-                  onScanned={setScannedVaults}
+                  {initializing}
+                  onScanned={handleScannedVaults}
                   onDevPreset={applyDevPreset}
                 />
               {:else if currentStep.key === 'vaults'}
@@ -336,6 +375,10 @@ function getCanNext(): boolean {
   }
 
   .dev-preset-error {
+    margin-bottom: var(--space-4);
+  }
+
+  .restore-error {
     margin-bottom: var(--space-4);
   }
 

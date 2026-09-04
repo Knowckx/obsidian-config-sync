@@ -33,6 +33,13 @@ export function ExecuteSyncPlan(plan: $models.SyncPlan): $CancellablePromise<$mo
 }
 
 /**
+ * GetLastVaultRoot 返回最近一次加载成功的 Vault 扫描根目录。
+ */
+export function GetLastVaultRoot(): $CancellablePromise<string> {
+    return $Call.ByID(3001162524);
+}
+
+/**
  * ListConfigItems 列出 vault 的 .obsidian 下可选择同步的配置项。
  */
 export function ListConfigItems(vaultPath: string): $CancellablePromise<$models.ConfigItem[]> {
@@ -53,6 +60,13 @@ export function OpenSyncBackupDir(backupPath: string): $CancellablePromise<void>
  */
 export function OpenVaultConfigDir(vaultPath: string): $CancellablePromise<void> {
     return $Call.ByID(132513533, vaultPath);
+}
+
+/**
+ * SaveLastVaultRoot 保存最近一次加载成功的 Vault 扫描根目录。
+ */
+export function SaveLastVaultRoot(root: string): $CancellablePromise<void> {
+    return $Call.ByID(3256816299, root);
 }
 
 /**

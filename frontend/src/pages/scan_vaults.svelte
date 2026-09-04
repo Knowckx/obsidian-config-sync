@@ -1,17 +1,24 @@
 <script lang="ts">
 import { Dialogs } from '@wailsio/runtime';
 import { Button, Input } from 'infa-s5';
-import { scanVaults, type VaultInfo } from '@/lib/api/vault_service';
+import { saveLastVaultRoot, scanVaults, type VaultInfo } from '@/lib/api/vault_service';
 import VaultList from '@/lib/components/vault_list.svelte';
 
 type Props = {
   root?: string;
   vaults?: VaultInfo[];
+  initializing?: boolean;
   onScanned?: (root: string, vaults: VaultInfo[]) => void;
   onDevPreset?: () => void | Promise<void>;
 };
 
-let { root = '', vaults = [], onScanned = () => {}, onDevPreset = () => {} }: Props = $props();
+let {
+  root = '',
+  vaults = [],
+  initializing = false,
+  onScanned = () => {},
+  onDevPreset = () => {},
+}: Props = $props();
 let error = $state('');
 let scanning = $state(false);
 let applyingDevPreset = $state(false);
@@ -33,6 +40,13 @@ const chooseAndScan = async () => {
   try {
     const foundVaults = await scanVaults(selected);
     onScanned(selected, foundVaults);
+    if (foundVaults.length > 0) {
+      try {
+        await saveLastVaultRoot(selected);
+      } catch (err) {
+        error = `Vault 已加载，但无法记忆目录：${getErrMsg(err)}`;
+      }
+    }
   } catch (err) {
     error = getErrMsg(err);
     onScanned(selected, []);
@@ -58,11 +72,11 @@ const applyDevPreset = async () => {
 <div class="step-content">
   <div class="toolbar">
     <div class="actions">
-      <Button onclick={chooseAndScan} disabled={scanning}>
-        {scanning ? '扫描中' : '选择目录'}
+      <Button onclick={chooseAndScan} disabled={scanning || initializing}>
+        {initializing ? '正在恢复' : scanning ? '扫描中' : '选择目录'}
       </Button>
       {#if import.meta.env.DEV}
-        <Button onclick={applyDevPreset} disabled={applyingDevPreset}>
+        <Button onclick={applyDevPreset} disabled={applyingDevPreset || initializing}>
           {applyingDevPreset ? '正在进入 M3…' : '开发：快速进入 M3'}
         </Button>
       {/if}

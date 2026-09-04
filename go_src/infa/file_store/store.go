@@ -1,7 +1,6 @@
 package file_store
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -39,7 +38,6 @@ func newStore(softName string, fileName string) (*Store, error) {
 	if err := file.Close(); err != nil {
 		return nil, err
 	}
-	log.Printf("file store path: %+v", storePath)
 	return &Store{path: storePath}, nil
 }
 
@@ -50,7 +48,6 @@ func tomlFileName(fileName string) string {
 	}
 	return fileName + ".toml"
 }
-
 
 // Store 表示一个用户配置目录下的 TOML 文件存储。
 type Store struct {
@@ -88,23 +85,34 @@ func (s *Store) Save(key string, value any) error {
 	return nil
 }
 
-
 // Get 读取指定 key 的值并写入 out。
 func (s *Store) Get(key string, out any) error {
-	data, err := s.readAll()
+	found, err := s.GetOptional(key, out)
 	if err != nil {
 		return errors.WithStack(err)
+	}
+	if !found {
+		return errors.Errorf("key 不存在: %s", key)
+	}
+	return nil
+}
+
+// GetOptional 读取指定 key；key 不存在时返回 false。
+func (s *Store) GetOptional(key string, out any) (bool, error) {
+	data, err := s.readAll()
+	if err != nil {
+		return false, errors.WithStack(err)
 	}
 
 	value, ok := data[key]
 	if !ok {
-		return errors.Errorf("key 不存在: %s", key)
+		return false, nil
 	}
 
 	if err := decodeValue(key, value, out); err != nil {
-		return errors.WithStack(err)
+		return false, errors.WithStack(err)
 	}
-	return nil
+	return true, nil
 }
 
 // readAll 读取整个 TOML 文件。

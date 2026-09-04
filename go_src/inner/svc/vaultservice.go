@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 
 	"obsi-conf-sync/go_src/conf"
+	"obsi-conf-sync/go_src/inner/app_settings"
 
 	"github.com/cockroachdb/errors"
 )
@@ -55,6 +56,27 @@ func (s *VaultService) ScanVaults(root string) ([]VaultInfo, error) {
 		return nil, errors.WithStack(err)
 	}
 	return vaults, nil
+}
+
+// GetLastVaultRoot 返回最近一次加载成功的 Vault 扫描根目录。
+func (s *VaultService) GetLastVaultRoot() (string, error) {
+	root, err := app_settings.GetLastVaultRoot()
+	if err != nil {
+		return "", errors.WithStack(err)
+	}
+	return root, nil
+}
+
+// SaveLastVaultRoot 保存最近一次加载成功的 Vault 扫描根目录。
+func (s *VaultService) SaveLastVaultRoot(root string) error {
+	rootPath, err := precheckScanRoot(root)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	if err := app_settings.SaveLastVaultRoot(rootPath); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
 }
 
 // ListConfigItems 列出 vault 的 .obsidian 下可选择同步的配置项。
