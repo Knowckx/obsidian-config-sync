@@ -1,5 +1,5 @@
 <script lang="ts">
-// import { Button } from 'infa-s5';
+// import { Button } from '@knowckx/infa-s5';
 import {
   // openSyncBackupDir,
   SyncResultStatus,

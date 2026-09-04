@@ -1,6 +1,7 @@
 .task
 /.env.local
 bin
+/node_modules
 /temp/
 frontend/dist
 frontend/node_modules

@@ -1,8 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* 手动添加这一行来扫描 infa-s5 的组件 | 推荐使用相对路径 */
-@source "../node_modules/infa-s5/dist";
+/* 扫描 infa-s5 组件中的 Tailwind 类 */
+@source "../node_modules/@knowckx/infa-s5/dist";
 
 :root {
   --color-text: #344054;

@@ -1,6 +1,6 @@
 <script lang="ts">
 import { Dialogs } from '@wailsio/runtime';
-import { Button, Input } from 'infa-s5';
+import { Button, Input } from '@knowckx/infa-s5';
 import { saveLastVaultRoot, scanVaults, type VaultInfo } from '@/lib/api/vault_service';
 import VaultList from '@/lib/components/vault_list.svelte';
 

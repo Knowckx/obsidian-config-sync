@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMount } from 'svelte';
-import { Button } from 'infa-s5';
+import { Button } from '@knowckx/infa-s5';
 import {
   buildSyncPlan,
   executeSyncPlan,
@@ -307,7 +307,7 @@ function getCanNext(): boolean {
         <StepNav {steps} currentKey={currentStep.key} />
 
         <Section>
-          <!-- infa-s5: <Card> -->
+          <!-- @knowckx/infa-s5: <Card> -->
           <Card>
             {#if devPresetError}
               <p class="status-error dev-preset-error">{devPresetError}</p>
@@ -366,7 +366,7 @@ function getCanNext(): boolean {
               <Button onclick={goNext} disabled={!canNext}>{nextLabel}</Button>
             </div>
           </Card>
-          <!-- infa-s5: </Card> -->
+          <!-- @knowckx/infa-s5: </Card> -->
         </Section>
       </div>
     </Page>

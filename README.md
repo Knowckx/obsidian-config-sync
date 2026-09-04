@@ -127,7 +127,7 @@ task dev
 task package
 ```
 
-当前前端还依赖同一 pnpm workspace 中的本地包 `infa-s5`。直接克隆本仓库进行源码构建前，需要先提供该 workspace 依赖。
+前端公共组件由 npm 包 `@knowckx/infa-s5` 提供，安装项目依赖后即可直接构建。
 
 ## 版本
 

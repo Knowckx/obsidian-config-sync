@@ -31,6 +31,6 @@
     },
     "dependencies": {
         "@wailsio/runtime": "3.0.0-beta.15",
-		"infa-s5": "workspace:*"
+		"@knowckx/infa-s5": "0.0.1"
     }
 }

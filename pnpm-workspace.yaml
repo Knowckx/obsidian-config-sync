@@ -1,0 +1,4 @@
+packages:
+  - frontend
+minimumReleaseAgeExclude:
+  - '@knowckx/infa-s5@0.0.1'

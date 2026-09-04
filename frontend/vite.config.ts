@@ -17,10 +17,6 @@ export default defineConfig({
             { find: '@', replacement: resolve(process.cwd(), 'src') }
         ]
     },
-    // ✅ 必须 - 禁用客户端预构建本地包的缓存
-    optimizeDeps: {
-        exclude: ['infa-s5']
-    },
     server: {
         host: "127.0.0.1",
         port: Number(process.env.WAILS_VITE_PORT) || 33005,
