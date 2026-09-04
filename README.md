@@ -1,8 +1,12 @@
 # Obsidian Config Sync
 
-Obsidian Config Sync 是一个 Windows 桌面工具，用于将一个 Obsidian 主库的 `.obsidian` 配置同步到多个目标库。
+Obsidian Config Sync 是一个桌面工具，用于将一个 Obsidian 主库的 `.obsidian` 配置同步到多个目标库。
+
+本项目基于 Wails 构建，理论上支持 Windows、macOS 和 Linux 桌面平台。目前作者仅在 Windows 上完成自测，macOS 和 Linux 尚未验证，无法保证正常运行。
 
 同步过程完全在本地运行。你可以选择需要同步的配置文件、主题、CSS 片段和社区插件，并在执行前查看同步计划。
+
+![Obsidian Config Sync 同步范围界面](docs/images/ui%202026-09-04.png)
 
 > **Beta 提示**
 >
