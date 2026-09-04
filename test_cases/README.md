@@ -18,7 +18,6 @@
    app.json
    snippets/
    themes
-   community-plugins.json
    plugins/open-in-new-tab/
    plugins/open-tab-settings/
    ```
@@ -37,7 +36,7 @@
 
 ```text
 覆盖1：app.json
-新增5：community-plugins.json、snippets、themes、plugins/open-in-new-tab、plugins/open-tab-settings
+新增4：snippets、themes、plugins/open-in-new-tab、plugins/open-tab-settings
 ```
 
 执行结果应为：
@@ -54,14 +53,14 @@
 
 ```text
 覆盖：app.json、snippets、themes、plugins/open-in-new-tab
-新增：community-plugins.json、plugins/open-tab-settings
+新增：plugins/open-tab-settings
 ```
 
 执行结果应为：
 
 ```text
 成功覆盖 app.json、snippets、plugins/open-in-new-tab
-成功新增 community-plugins.json、plugins/open-tab-settings
+成功新增 plugins/open-tab-settings
 themes 产生失败项：主库是目录，目标库是文件
 ```
 
@@ -71,6 +70,8 @@ themes 产生失败项：主库是目录，目标库是文件
 - `vault3/.obsidian/snippets/vscode_light.css` 已新增。
 - `vault3/.obsidian/snippets/target-only.css` 仍然保留。
 - `vault3/.obsidian/themes` 仍是文件，未被删除或替换。
+- `vault2/.obsidian/community-plugins.json` 已创建，并按选择顺序写入两个插件 ID。
+- `vault3/.obsidian/community-plugins.json` 保留原有插件，只追加缺少的插件 ID。
 
 以上结果构成核心测试的标准预期；结果不一致时，应先排查同步逻辑，再修改测试场地。
 

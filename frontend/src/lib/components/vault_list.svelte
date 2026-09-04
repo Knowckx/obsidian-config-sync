@@ -8,6 +8,7 @@ type Props = {
   targetVaults?: VaultInfo[];
   onMainChange?: (vault: VaultInfo) => void;
   onTargetToggle?: (vault: VaultInfo) => void;
+  onRemove?: (vault: VaultInfo) => void;
 };
 
 let {
@@ -17,6 +18,7 @@ let {
   targetVaults = [],
   onMainChange = () => {},
   onTargetToggle = () => {},
+  onRemove,
 }: Props = $props();
 
 const isMainVault = (vault: VaultInfo) => mainVault?.path === vault.path;
@@ -27,25 +29,30 @@ const isTargetVault = (vault: VaultInfo) => targetVaults.some((item) => item.pat
   <p>未发现 Vault</p>
 {:else}
   <ul class="vault-list">
-    {#each vaults as vault}
+    {#each vaults as vault (vault.path)}
       <li>
         <div class="vault-info">
           <strong>{vault.name}</strong>
           <span>{vault.path}</span>
         </div>
 
-        {#if mode === 'select'}
+        {#if mode === 'select' || onRemove}
           <div class="actions">
-            <button class:active={isMainVault(vault)} onclick={() => onMainChange(vault)}>
-              主库
-            </button>
-            <button
-              class:active={isTargetVault(vault)}
-              disabled={isMainVault(vault)}
-              onclick={() => onTargetToggle(vault)}
-            >
-              从库
-            </button>
+            {#if mode === 'select'}
+              <button class:active={isMainVault(vault)} onclick={() => onMainChange(vault)}>
+                主库
+              </button>
+              <button
+                class:active={isTargetVault(vault)}
+                disabled={isMainVault(vault)}
+                onclick={() => onTargetToggle(vault)}
+              >
+                从库
+              </button>
+            {/if}
+            {#if onRemove}
+              <button onclick={() => onRemove(vault)}>移除</button>
+            {/if}
           </div>
         {/if}
       </li>

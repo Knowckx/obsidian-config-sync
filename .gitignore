@@ -13,3 +13,4 @@ build/ios/xcode/gen/
 build/android/overlay.json
 build/android/gen/
 /AGENTS.md
+/temp.md

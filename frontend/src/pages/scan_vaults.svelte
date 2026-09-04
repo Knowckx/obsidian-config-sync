@@ -9,6 +9,7 @@ type Props = {
   vaults?: VaultInfo[];
   initializing?: boolean;
   onScanned?: (root: string, vaults: VaultInfo[]) => void;
+  onVaultRemove?: (vault: VaultInfo) => void;
   onDevPreset?: () => void | Promise<void>;
 };
 
@@ -17,6 +18,7 @@ let {
   vaults = [],
   initializing = false,
   onScanned = () => {},
+  onVaultRemove,
   onDevPreset = () => {},
 }: Props = $props();
 let error = $state('');
@@ -88,7 +90,10 @@ const applyDevPreset = async () => {
     <p class="status-error">{error}</p>
   {/if}
 
-  <VaultList {vaults} />
+  <VaultList {vaults} onRemove={onVaultRemove} />
+  {#if vaults.length === 1}
+    <p class="vault-count-hint">至少需要一个主库和一个从库。</p>
+  {/if}
 </div>
 
 <style>
@@ -102,6 +107,11 @@ const applyDevPreset = async () => {
   .actions {
     display: flex;
     gap: var(--space-2);
+  }
+
+  .vault-count-hint {
+    margin: 0;
+    color: var(--color-text-subtle);
   }
 
   @media (max-width: 640px) {

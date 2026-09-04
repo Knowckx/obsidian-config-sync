@@ -40,7 +40,6 @@ const steps: WizardStep[] = [
 
 const devSelectedPaths = [
   'app.json',
-  'community-plugins.json',
   'snippets/',
   'themes/',
   'plugins/open-in-new-tab/',
@@ -115,9 +114,28 @@ const handleScannedVaults = (selectedRoot: string, foundVaults: VaultInfo[]) => 
   setScannedVaults(selectedRoot, foundVaults);
 };
 
+// 从当前同步候选列表中移除 Vault，不操作磁盘目录。
+const removeVault = (vault: VaultInfo) => {
+  vaults = vaults.filter((item) => item.path !== vault.path);
+};
+
 onMount(() => {
   void restoreLastVaultRoot();
 });
+
+// 返回扫描步骤后，后续同步流程重新开始。
+const resetFollowingSteps = () => {
+  mainVault = null;
+  targetVaults = [];
+  configItems = [];
+  selectedPaths = [];
+  syncPlan = null;
+  planLoading = false;
+  planError = '';
+  syncResult = null;
+  syncing = false;
+  executeError = '';
+};
 
 const setMainVault = (vault: VaultInfo) => {
   mainVault = vault;
@@ -177,8 +195,13 @@ const toggleTargetVault = (vault: VaultInfo) => {
 };
 
 const goBack = () => {
-  if (canBack) {
-    stepIndex -= 1;
+  if (!canBack) {
+    return;
+  }
+
+  stepIndex -= 1;
+  if (stepIndex === 0) {
+    resetFollowingSteps();
   }
 };
 
@@ -213,14 +236,7 @@ const finishSync = async () => {
     await removeDirectory();
     devTestRoot = null;
   }
-  mainVault = null;
-  targetVaults = [];
-  configItems = [];
-  selectedPaths = [];
-  syncPlan = null;
-  planError = '';
-  syncResult = null;
-  executeError = '';
+  resetFollowingSteps();
   stepIndex = 0;
 };
 
@@ -264,7 +280,7 @@ const executePlan = async () => {
 
 function getCanNext(): boolean {
   if (currentStep.key === 'scan') {
-    return vaults.length > 0;
+    return vaults.length >= 2;
   }
 
   if (currentStep.key === 'vaults') {
@@ -308,6 +324,7 @@ function getCanNext(): boolean {
                   {vaults}
                   {initializing}
                   onScanned={handleScannedVaults}
+                  onVaultRemove={removeVault}
                   onDevPreset={applyDevPreset}
                 />
               {:else if currentStep.key === 'vaults'}

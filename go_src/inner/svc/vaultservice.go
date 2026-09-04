@@ -16,6 +16,8 @@ import (
 	"github.com/cockroachdb/errors"
 )
 
+const communityPluginsFileName = "community-plugins.json"
+
 // VaultService 向前端暴露 vault 扫描接口。
 type VaultService struct {
 	isSyncing atomic.Bool // 是否正在执行同步
@@ -218,6 +220,9 @@ func listConfigItems(obsidianPath string) ([]ConfigItem, error) {
 
 	items := make([]ConfigItem, 0)
 	for _, entry := range entries {
+		if entry.Name() == communityPluginsFileName {
+			continue
+		}
 		if entry.Name() == "plugins" && entry.IsDir() {
 			pluginItems, err := listPluginConfigItems(obsidianPath)
 			if err != nil {
@@ -283,22 +288,31 @@ func listPluginConfigItems(obsidianPath string) ([]ConfigItem, error) {
 
 // pluginManifest 表示插件清单中用于展示的信息。
 type pluginManifest struct {
+	ID      string `json:"id"`
 	Name    string `json:"name"`
 	Version string `json:"version"`
 }
 
-// readPluginManifest 读取插件名称和版本，读取失败时返回零值。
+// readPluginManifest 读取插件清单，读取失败时返回零值。
 func readPluginManifest(path string) pluginManifest {
-	data, err := os.ReadFile(path)
+	manifest, err := loadPluginManifest(path)
 	if err != nil {
 		return pluginManifest{}
 	}
+	return manifest
+}
 
+// loadPluginManifest 读取并解析插件清单。
+func loadPluginManifest(path string) (pluginManifest, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return pluginManifest{}, err
+	}
 	var manifest pluginManifest
 	if err := json.Unmarshal(data, &manifest); err != nil {
-		return pluginManifest{}
+		return pluginManifest{}, err
 	}
-	return manifest
+	return manifest, nil
 }
 
 // openDir 使用当前系统的文件管理器打开目录。

@@ -29,11 +29,6 @@ var ConfigItemRules = map[string]ConfigItemRule{
 	},
 
 	// 默认跳过
-	"community-plugins.json": {
-		Description:     "已启用的社区插件列表，需要与对应插件目录一起同步",
-		DefaultSelected: false,
-		IsPlugin:        true,
-	},
 	"graph.json": {
 		Description:     "关系图谱的显示和布局设置，通常不需要跨库同步",
 		DefaultSelected: false,

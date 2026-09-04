@@ -1,6 +1,7 @@
 package svc
 
 import (
+	"encoding/json"
 	"io"
 	"io/fs"
 	"os"
@@ -50,7 +51,7 @@ func (t *VaultService) ExecuteSyncPlan(plan SyncPlan) (SyncResult, error) {
 			}
 			src := filepath.Join(currentPlan.MainVaultPath, ".obsidian", filepath.FromSlash(item.Path))
 			dst := filepath.Join(target.VaultPath, ".obsidian", filepath.FromSlash(item.Path))
-			if err := copySyncItem(src, dst); err != nil {
+			if err := executeSyncItem(src, dst, target.VaultPath, item.Path); err != nil {
 				resultItem.Status = SyncResultStatusFailed
 				resultItem.Error = errors.Wrapf(err, "同步配置失败: %s", item.Path).Error()
 			}
@@ -65,6 +66,88 @@ func (t *VaultService) ExecuteSyncPlan(plan SyncPlan) (SyncResult, error) {
 	// 	}
 	// }
 	return result, nil
+}
+
+// executeSyncItem 执行单个配置项，插件同步后同时更新目标库启用列表。
+func executeSyncItem(src string, dst string, targetVaultPath string, syncPath string) error {
+	if !isPluginSyncPath(syncPath) {
+		return copySyncItem(src, dst)
+	}
+	communityPluginsPath := filepath.Join(targetVaultPath, ".obsidian", communityPluginsFileName)
+	return syncPlugin(src, dst, communityPluginsPath)
+}
+
+// isPluginSyncPath 判断同步项是否为单个社区插件目录。
+func isPluginSyncPath(path string) bool {
+	return strings.HasPrefix(path, "plugins/") && strings.HasSuffix(path, "/")
+}
+
+// syncPlugin 复制插件目录，并将插件 ID 追加到目标库启用列表。
+func syncPlugin(src string, dst string, communityPluginsPath string) error {
+	manifest, err := loadPluginManifest(filepath.Join(src, "manifest.json"))
+	if err != nil {
+		return errors.Wrap(err, "读取插件清单失败")
+	}
+	pluginID := strings.TrimSpace(manifest.ID)
+	if pluginID == "" {
+		return errors.New("插件清单缺少 id")
+	}
+
+	enabledPlugins, mode, err := readCommunityPlugins(communityPluginsPath)
+	if err != nil {
+		return errors.Wrap(err, "读取目标库社区插件列表失败")
+	}
+	if err := copySyncItem(src, dst); err != nil {
+		return err
+	}
+	if containsString(enabledPlugins, pluginID) {
+		return nil
+	}
+
+	enabledPlugins = append(enabledPlugins, pluginID)
+	data, err := json.MarshalIndent(enabledPlugins, "", "  ")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	data = append(data, '\n')
+	if err := os.WriteFile(communityPluginsPath, data, mode); err != nil {
+		return errors.Wrap(err, "更新目标库社区插件列表失败")
+	}
+	return nil
+}
+
+// readCommunityPlugins 读取目标库启用插件列表，文件不存在时返回空列表。
+func readCommunityPlugins(path string) ([]string, fs.FileMode, error) {
+	data, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return []string{}, 0o644, nil
+	}
+	if err != nil {
+		return nil, 0, err
+	}
+
+	var plugins []string
+	if err := json.Unmarshal(data, &plugins); err != nil {
+		return nil, 0, err
+	}
+	if plugins == nil {
+		return nil, 0, errors.New("社区插件列表必须是 JSON 数组")
+	}
+	info, err := os.Stat(path)
+	if err != nil {
+		return nil, 0, err
+	}
+	return plugins, info.Mode().Perm(), nil
+}
+
+// containsString 判断列表中是否已经存在指定字符串。
+func containsString(items []string, target string) bool {
+	for _, item := range items {
+		if item == target {
+			return true
+		}
+	}
+	return false
 }
 
 // rebuildSyncPlan 根据待执行计划重新生成当前计划。

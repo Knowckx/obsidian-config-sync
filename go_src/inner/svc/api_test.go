@@ -1,6 +1,7 @@
 package svc_test
 
 import (
+	"encoding/json"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -14,7 +15,6 @@ import (
 
 var coreSyncSelectedPaths = []string{
 	"app.json",
-	"community-plugins.json",
 	"snippets/",
 	"themes/",
 	"plugins/open-in-new-tab/",
@@ -39,6 +39,7 @@ func Test_CoreSyncRegression(t *testing.T) {
 		t.Fatalf("ListConfigItems 失败: %v", err)
 	}
 	assertContainsPaths(t, configItemPaths(items), coreSyncSelectedPaths)
+	assertNotContainsPath(t, configItemPaths(items), "community-plugins.json")
 
 	plan, err := service.BuildSyncPlan(svc.SyncRequest{
 		MainVaultPath:    mainVault,
@@ -58,11 +59,9 @@ func Test_CoreSyncRegression(t *testing.T) {
 		svc.SyncPlanActionCreate,
 		svc.SyncPlanActionCreate,
 		svc.SyncPlanActionCreate,
-		svc.SyncPlanActionCreate,
 	})
 	assertTargetPlan(t, plan.Targets[1], []svc.SyncPlanAction{
 		svc.SyncPlanActionOverwrite,
-		svc.SyncPlanActionCreate,
 		svc.SyncPlanActionOverwrite,
 		svc.SyncPlanActionOverwrite,
 		svc.SyncPlanActionOverwrite,
@@ -84,23 +83,67 @@ func Test_CoreSyncRegression(t *testing.T) {
 		svc.SyncResultStatusCreated,
 		svc.SyncResultStatusCreated,
 		svc.SyncResultStatusCreated,
-		svc.SyncResultStatusCreated,
 	}, nil)
 
 	vault3Result := result.Targets[1]
 	assertTargetResult(t, vault3Result, []svc.SyncResultStatus{
 		svc.SyncResultStatusOverwrote,
-		svc.SyncResultStatusCreated,
 		svc.SyncResultStatusOverwrote,
 		svc.SyncResultStatusFailed,
 		svc.SyncResultStatusOverwrote,
 		svc.SyncResultStatusCreated,
-	}, []string{"", "", "", "themes", "", ""})
+	}, []string{"", "", "themes", "", ""})
 
 	assertFileEqual(t, filepath.Join(mainVault, ".obsidian", "snippets", "table-spacing-fix.css"), filepath.Join(targetVault3, ".obsidian", "snippets", "table-spacing-fix.css"))
 	assertFileExists(t, filepath.Join(targetVault3, ".obsidian", "snippets", "vscode_light.css"))
 	assertFileExists(t, filepath.Join(targetVault3, ".obsidian", "snippets", "target-only.css"))
 	assertRegularFile(t, filepath.Join(targetVault3, ".obsidian", "themes"))
+	assertStringList(t, readStringList(t, filepath.Join(targetVault2, ".obsidian", "community-plugins.json")), []string{"open-in-new-tab", "open-tab-settings"})
+	assertStringList(t, readStringList(t, filepath.Join(targetVault3, ".obsidian", "community-plugins.json")), []string{"solve", "open-tab-settings", "open-in-new-tab"})
+}
+
+// Test_InvalidCommunityPluginsPreserved 验证无效启用列表不会被覆盖，也不会复制插件目录。
+func Test_InvalidCommunityPluginsPreserved(t *testing.T) {
+	fixturesRoot := coreTestCasesRoot(t)
+	runRoot := t.TempDir()
+	mainVault := filepath.Join(runRoot, "vault1")
+	targetVault := filepath.Join(runRoot, "vault2")
+	copyTree(t, filepath.Join(fixturesRoot, "vault1"), mainVault)
+	copyTree(t, filepath.Join(fixturesRoot, "vault2"), targetVault)
+
+	communityPluginsPath := filepath.Join(targetVault, ".obsidian", "community-plugins.json")
+	invalidContent := []byte(`{"invalid": true}`)
+	if err := os.WriteFile(communityPluginsPath, invalidContent, 0o644); err != nil {
+		t.Fatalf("写入无效社区插件列表失败: %v", err)
+	}
+
+	service := &svc.VaultService{}
+	plan, err := service.BuildSyncPlan(svc.SyncRequest{
+		MainVaultPath:    mainVault,
+		TargetVaultPaths: []string{targetVault},
+		SelectedPaths:    []string{"plugins/open-in-new-tab/"},
+	})
+	if err != nil {
+		t.Fatalf("BuildSyncPlan 失败: %v", err)
+	}
+	result, err := service.ExecuteSyncPlan(plan)
+	if err != nil {
+		t.Fatalf("ExecuteSyncPlan 失败: %v", err)
+	}
+	if result.Targets[0].Items[0].Status != svc.SyncResultStatusFailed {
+		t.Errorf("无效社区插件列表应导致插件同步失败: %s", result.Targets[0].Items[0].Status)
+	}
+	gotContent, err := os.ReadFile(communityPluginsPath)
+	if err != nil {
+		t.Fatalf("读取无效社区插件列表失败: %v", err)
+	}
+	if string(gotContent) != string(invalidContent) {
+		t.Errorf("无效社区插件列表不应被覆盖: %s", gotContent)
+	}
+	pluginPath := filepath.Join(targetVault, ".obsidian", "plugins", "open-in-new-tab")
+	if _, err := os.Stat(pluginPath); !os.IsNotExist(err) {
+		t.Errorf("目标插件目录不应被创建: %s", pluginPath)
+	}
 }
 
 func coreTestCasesRoot(t *testing.T) string {
@@ -165,6 +208,15 @@ func assertContainsPaths(t *testing.T, got []string, want []string) {
 	}
 }
 
+func assertNotContainsPath(t *testing.T, got []string, unwanted string) {
+	t.Helper()
+	for _, path := range got {
+		if path == unwanted {
+			t.Errorf("不应包含配置路径: %s", unwanted)
+		}
+	}
+}
+
 func assertTargetPlan(t *testing.T, target svc.TargetSyncPlan, wantActions []svc.SyncPlanAction) {
 	t.Helper()
 	if len(target.Items) != len(coreSyncSelectedPaths) {
@@ -203,6 +255,26 @@ func assertPaths(t *testing.T, name string, got []string, want []string) {
 	sort.Strings(wantCopy)
 	if strings.Join(gotCopy, "\n") != strings.Join(wantCopy, "\n") {
 		t.Errorf("%s 不符:\nwant: %v\ngot:  %v", name, wantCopy, gotCopy)
+	}
+}
+
+func readStringList(t *testing.T, path string) []string {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("读取字符串列表失败: %s: %v", path, err)
+	}
+	var items []string
+	if err := json.Unmarshal(data, &items); err != nil {
+		t.Fatalf("解析字符串列表失败: %s: %v", path, err)
+	}
+	return items
+}
+
+func assertStringList(t *testing.T, got []string, want []string) {
+	t.Helper()
+	if strings.Join(got, "\n") != strings.Join(want, "\n") {
+		t.Errorf("字符串列表不符: want %v, got %v", want, got)
 	}
 }
 

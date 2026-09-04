@@ -75,8 +75,8 @@ const togglePath = (path: string) => {
   );
 };
 
-const selectAll = () => {
-  onSelectedPathsChange(configItems.map((item) => item.path));
+const clearSelection = () => {
+  onSelectedPathsChange([]);
 };
 
 const selectDefault = () => {
@@ -140,7 +140,7 @@ const getItemDescription = (item: ConfigItem): string => {
     <div class="actions">
       <Button onclick={openConfigDir} disabled={!mainVault}>打开配置文件夹</Button>
       <Button onclick={selectDefault} disabled={loading || configItems.length === 0}>默认</Button>
-      <Button onclick={selectAll} disabled={loading || configItems.length === 0}>全选</Button>
+      <Button onclick={clearSelection} disabled={loading || selectedPaths.length === 0}>全不选</Button>
     </div>
   </div>
 
@@ -185,7 +185,7 @@ const getItemDescription = (item: ConfigItem): string => {
               社区插件
               <span>已选择 {selectedPluginCount} / 共 {pluginConfigItems.length}</span>
             </h3>
-            <p>插件包含程序和设置，请根据需要手动选择要同步的插件。</p>
+            <p>同步插件会复制程序和设置，并在目标库中启用插件。</p>
           </div>
           <ul class="config-list">
             {#each pluginConfigItems as item (item.path)}
