@@ -10,7 +10,7 @@ Obsidian Config Sync 是一个桌面工具，用于将一个 Obsidian 主库的 
 
 > **Beta 提示**
 >
-> 当前版本为 `v0.1.0-beta.1`，已经完成基本功能并经过个人使用测试，但仍可能存在未发现的问题。首次使用前，请务必手动备份 Vault，至少备份各个库的 `.obsidian` 目录。
+> 当前版本处于 Beta 阶段，已经完成基本功能并经过个人使用测试，但仍可能存在未发现的问题。首次使用前，请务必备份 Vault，至少备份各个库的 `.obsidian` 目录， 或者使用git对文档仓库进行版本控制。
 
 ## 当前功能
 
@@ -141,8 +141,4 @@ task dev
 task build
 ```
 
-推送与 `build/config.yml` 版本一致的 `v*` 标签后，GitHub Actions 会构建 Windows、Linux 和 macOS Release 产物。也可以手动运行 Release workflow，只生成临时构建产物而不创建 GitHub Release。
 
-## 版本
-
-当前公开测试版本：`v0.1.0-beta.1`
