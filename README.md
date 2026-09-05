@@ -141,4 +141,5 @@ task dev
 task build
 ```
 
-
+## 论坛讨论帖子
+> 对应的论坛帖  [v2ex](https://www.v2ex.com/t/1239661)  |  [L站](https://linux.do/)  
