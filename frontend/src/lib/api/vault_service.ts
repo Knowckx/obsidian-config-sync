@@ -1,10 +1,10 @@
-import { DevService, VaultService } from '@bindings/obsi-conf-sync/go_src/inner/svc';
+import { DevService, VaultService } from '@bindings/obsidian-config-sync/go_src/inner/svc';
 import {
   SyncPlanAction,
   SyncPlan as SyncPlanModel,
   SyncRequest as SyncRequestModel,
   SyncResultStatus,
-} from '@bindings/obsi-conf-sync/go_src/inner/svc/models';
+} from '@bindings/obsidian-config-sync/go_src/inner/svc/models';
 
 export { SyncPlanAction, SyncResultStatus };
 

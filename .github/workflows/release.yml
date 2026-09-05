@@ -1,0 +1,264 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "24"
+  PNPM_VERSION: "12.3.2"
+  TASK_VERSION: "3.51.1"
+  WAILS_VERSION: "v3.0.0-beta.15"
+
+jobs:
+  metadata:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Read and validate version
+        id: version
+        shell: bash
+        run: |
+          version="$(sed -nE 's/^  version: "([^"]+)".*/\1/p' build/config.yml)"
+          if [[ -z "$version" ]]; then
+            echo "Unable to read info.version from build/config.yml" >&2
+            exit 1
+          fi
+          if [[ "$GITHUB_REF_TYPE" == "tag" && "$GITHUB_REF_NAME" != "v$version" ]]; then
+            echo "Tag $GITHUB_REF_NAME does not match config version $version" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [[ "$version" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-windows:
+    needs: metadata
+    runs-on: windows-2025
+    env:
+      RELEASE_VERSION: ${{ needs.metadata.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Set up Task
+        uses: arduino/setup-task@v3
+        with:
+          version: ${{ env.TASK_VERSION }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v3/cmd/wails3@${{ env.WAILS_VERSION }}
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Update build assets
+        run: task common:update:build-assets
+
+      - name: Build Windows application
+        run: task windows:build ARCH=amd64
+
+      - name: Prepare Windows artifact
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path release
+          Move-Item -LiteralPath 'bin/obsidian-config-sync.exe' -Destination "release/obsidian-config-sync-v$env:RELEASE_VERSION-windows-x64.exe"
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-windows-x64
+          path: release/*.exe
+          if-no-files-found: error
+
+  build-linux:
+    needs: metadata
+    runs-on: ubuntu-24.04
+    env:
+      RELEASE_VERSION: ${{ needs.metadata.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Set up Task
+        uses: arduino/setup-task@v3
+        with:
+          version: ${{ env.TASK_VERSION }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libgtk-4-dev libwebkitgtk-6.0-dev
+
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v3/cmd/wails3@${{ env.WAILS_VERSION }}
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Update build assets
+        run: task common:update:build-assets
+
+      - name: Build Linux application
+        run: task linux:build ARCH=amd64 OUTPUT=bin/obsidian-config-sync
+
+      - name: Prepare Linux artifact
+        run: |
+          mkdir -p release
+          tar -C bin -czf "release/obsidian-config-sync-v${RELEASE_VERSION}-linux-x64.tar.gz" obsidian-config-sync
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-linux-x64
+          path: release/*.tar.gz
+          if-no-files-found: error
+
+  build-macos:
+    needs: metadata
+    runs-on: macos-15
+    env:
+      RELEASE_VERSION: ${{ needs.metadata.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Set up Task
+        uses: arduino/setup-task@v3
+        with:
+          version: ${{ env.TASK_VERSION }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v3/cmd/wails3@${{ env.WAILS_VERSION }}
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Update build assets
+        run: task common:update:build-assets
+
+      - name: Build macOS application
+        run: task darwin:package:universal
+
+      - name: Prepare macOS artifact
+        run: |
+          mkdir -p release
+          ditto -c -k --sequesterRsrc --keepParent "bin/obsidian-config-sync.app" "release/obsidian-config-sync-v${RELEASE_VERSION}-macos-universal.zip"
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-macos-universal
+          path: release/*.zip
+          if-no-files-found: error
+
+  release:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs:
+      - metadata
+      - build-windows
+      - build-linux
+      - build-macos
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      IS_PRERELEASE: ${{ needs.metadata.outputs.prerelease }}
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: release-*
+          path: release
+          merge-multiple: true
+
+      - name: Publish GitHub Release
+        shell: bash
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" release/* --clobber
+            exit 0
+          fi
+          args=(--title "$GITHUB_REF_NAME" --generate-notes --verify-tag)
+          if [[ "$IS_PRERELEASE" == "true" ]]; then
+            args+=(--prerelease)
+          fi
+          gh release create "$GITHUB_REF_NAME" release/* "${args[@]}"

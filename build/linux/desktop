@@ -1,13 +1,13 @@
 [Desktop Entry]
 Version=1.0
-Name=ob-conf-sync
+Name=obsidian-config-sync
 Comment=用于同步多个 Obsidian 库配置的桌面应用
 # The Exec line includes %u to pass the URL to the application
-Exec=/usr/local/bin/obsi-conf-sync %u
+Exec=/usr/local/bin/obsidian-config-sync %u
 Terminal=false
 Type=Application
-Icon=obsi-conf-sync
+Icon=obsidian-config-sync
 Categories=Utility;
-StartupWMClass=obsi-conf-sync
+StartupWMClass=obsidian-config-sync
 
  

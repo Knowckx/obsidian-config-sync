@@ -7,7 +7,7 @@ import { messages } from './messages';
 export const i18n = createI18n({
   messages,
   fallbackLocale: 'en',
-  storageKey: 'obsi-conf-sync.locale',
+  storageKey: 'obsidian-config-sync.locale',
 });
 
 export type AppLocale = keyof typeof messages;

@@ -1,14 +1,14 @@
 {
 	"fixed": {
-		"file_version": "0.0.1"
+		"file_version": "0.1.0-beta.1"
 	},
 	"info": {
 		"0000": {
-			"ProductVersion": "0.0.1",
+			"ProductVersion": "0.1.0-beta.1",
 			"CompanyName": "knowckx",
 			"FileDescription": "用于同步多个 Obsidian 库配置的桌面应用",
 			"LegalCopyright": "Copyright © 2026 knowckx",
-			"ProductName": "ob-conf-sync",
+			"ProductName": "obsidian-config-sync",
 			"Comments": "Obsidian 配置同步工具"
 		}
 	}

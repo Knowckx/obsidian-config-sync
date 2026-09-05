@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"obsi-conf-sync/go_src/inner/svc"
+	"obsidian-config-sync/go_src/inner/svc"
 )
 
 var coreSyncSelectedPaths = []string{

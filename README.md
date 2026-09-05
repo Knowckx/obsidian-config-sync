@@ -22,16 +22,17 @@ Obsidian Config Sync 是一个桌面工具，用于将一个 Obsidian 主库的 
 - 同步社区插件的程序和设置，并在目标库中启用插件。
 - 完全离线运行，不依赖 Obsidian 插件 API。
 
-## 下载与安装
+## 下载与运行
 
-当前 Beta 版本主要面向 Windows x64。
+GitHub Release 提供以下应用程序：
 
-1. 打开 [GitHub Releases](https://github.com/Knowckx/obsidian-config-sync/releases)。
-2. 找到 `Obsidian Config Sync v0.1.0 Beta 1`。
-3. 下载 `obsidian-config-sync-v0.1.0-beta.1-windows-x64.exe`。
-4. 运行安装程序并按提示完成安装。
+- Windows x64：`obsidian-config-sync-v{version}-windows-x64.exe`。
+- Linux x64：`obsidian-config-sync-v{version}-linux-x64.tar.gz`。
+- macOS Intel/Apple Silicon：`obsidian-config-sync-v{version}-macos-universal.zip`。
 
-当前安装程序尚未进行代码签名，Windows 可能显示 SmartScreen 警告。请确认安装包来自本项目的 GitHub Releases 页面后再决定是否继续运行。
+打开 [GitHub Releases](https://github.com/Knowckx/obsidian-config-sync/releases)，下载对应平台文件并解压或直接运行。当前应用尚未进行正式代码签名，Windows 可能显示 SmartScreen 警告，macOS 可能显示 Gatekeeper 提示。请确认文件来自本项目的 GitHub Releases 页面后再决定是否继续运行。
+
+Linux 版本依赖系统提供 GTK4 和 WebKitGTK 6.0 运行库。
 
 ## 使用方法
 
@@ -115,19 +116,32 @@ Obsidian Config Sync 是一个桌面工具，用于将一个 Obsidian 主库的 
 
 项目使用 Wails 3、Go、Svelte 5、TypeScript 和 pnpm。
 
-本地开发：
+开发环境需要安装：
+
+- Go 1.27.1。
+- Node.js 和 pnpm 12.3.2。
+- Wails 3 CLI。
+- [Task](https://taskfile.dev/)。
+
+克隆仓库后，先安装前端依赖：
+
+```powershell
+pnpm install
+```
+
+启动本地开发环境：
 
 ```powershell
 task dev
 ```
 
-生成 Windows 安装包：
+生成当前系统的应用程序：
 
 ```powershell
-task package
+task build
 ```
 
-前端公共组件由 npm 包 `@knowckx/infa-s5` 提供，安装项目依赖后即可直接构建。
+推送与 `build/config.yml` 版本一致的 `v*` 标签后，GitHub Actions 会构建 Windows、Linux 和 macOS Release 产物。也可以手动运行 Release workflow，只生成临时构建产物而不创建 GitHub Release。
 
 ## 版本
 

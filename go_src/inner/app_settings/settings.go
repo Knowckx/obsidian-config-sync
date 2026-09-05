@@ -1,9 +1,9 @@
 package app_settings
 
-import "obsi-conf-sync/go_src/infa/file_store"
+import "obsidian-config-sync/go_src/infa/file_store"
 
 const (
-	softwareName     = "obsi-conf-sync"
+	softwareName     = "obsidian-config-sync"
 	settingsFileName = "settings.toml"
 	lastVaultRootKey = "last_vault_root"
 )

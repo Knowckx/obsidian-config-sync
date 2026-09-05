@@ -2,7 +2,7 @@ package template
 
 import (
 	"log"
-	"obsi-conf-sync/go_src/infa"
+	"obsidian-config-sync/go_src/infa"
 
 	"github.com/cockroachdb/errors"
 )
@@ -76,6 +76,5 @@ func (t *exampleCache) todo_LoadData(key string) (*ExampleCacheData, error) {
 	_ = key
 	return nil, nil
 }
-
 
 

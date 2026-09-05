@@ -245,7 +245,7 @@ func syncBackupRoot() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Abs(filepath.Join(cacheDir, "obsi-conf-sync", "backups"))
+	return filepath.Abs(filepath.Join(cacheDir, "obsidian-config-sync", "backups"))
 }
 
 // precheckBackupRoot 检查备份根路径是普通目录而非符号链接。

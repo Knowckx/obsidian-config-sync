@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  APP_NAME: "obsi-conf-sync"
+  APP_NAME: "obsidian-config-sync"
   BIN_DIR: "bin"
   PACKAGE_MANAGER: '{{.PACKAGE_MANAGER | default "pnpm"}}'
   VITE_PORT: '{{.WAILS_VITE_PORT | default 33005}}'
@@ -9,8 +9,8 @@ vars:
 includes:
   common: ./build/Taskfile.yml
   windows: ./build/windows/Taskfile.yml
-  # darwin: ./build/darwin/Taskfile.yml
-  # linux: ./build/linux/Taskfile.yml
+  darwin: ./build/darwin/Taskfile.yml
+  linux: ./build/linux/Taskfile.yml
   # ios: ./build/ios/Taskfile.yml
   # android: ./build/android/Taskfile.yml
 
@@ -37,12 +37,12 @@ tasks:
       - task: "{{OS}}:build"
 
   package:
-    summary: 打生产安装包，Windows 下默认生成 NSIS 安装器
+    summary: 打当前系统的生产安装包
     cmds:
       - task: "{{OS}}:package"
 
   run:
-    summary: 运行已构建的程序，Windows 下是 bin/obsi-conf-sync.exe
+    summary: 运行已构建的程序，Windows 下是 bin/obsidian-config-sync.exe
     cmds:
       - task: "{{OS}}:run"
 

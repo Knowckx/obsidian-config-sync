@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"obsi-conf-sync/go_src/infa/ops"
+	"obsidian-config-sync/go_src/infa/ops"
 )
 
 type testConfigItem struct {

@@ -18,7 +18,7 @@ import * as $models from "./models.js";
  * BuildSyncPlan 根据主库配置和用户选择生成覆盖同步计划，不修改文件。
  */
 export function BuildSyncPlan(req: $models.SyncRequest): $CancellablePromise<$models.SyncPlan> {
-    return $Call.ByID(3225252696, req).then(($result: any) => {
+    return $Call.ByID(2651385656, req).then(($result: any) => {
         return $$createType0($result);
     });
 }
@@ -27,7 +27,7 @@ export function BuildSyncPlan(req: $models.SyncRequest): $CancellablePromise<$mo
  * ExecuteSyncPlan 执行覆盖同步；已有同步任务运行时拒绝新的调用。
  */
 export function ExecuteSyncPlan(plan: $models.SyncPlan): $CancellablePromise<$models.SyncResult> {
-    return $Call.ByID(2207408831, plan).then(($result: any) => {
+    return $Call.ByID(3058193055, plan).then(($result: any) => {
         return $$createType1($result);
     });
 }
@@ -36,14 +36,14 @@ export function ExecuteSyncPlan(plan: $models.SyncPlan): $CancellablePromise<$mo
  * GetLastVaultRoot 返回最近一次加载成功的 Vault 扫描根目录。
  */
 export function GetLastVaultRoot(): $CancellablePromise<string> {
-    return $Call.ByID(3001162524);
+    return $Call.ByID(4184947132);
 }
 
 /**
  * ListConfigItems 列出 vault 的 .obsidian 下可选择同步的配置项。
  */
 export function ListConfigItems(vaultPath: string): $CancellablePromise<$models.ConfigItem[]> {
-    return $Call.ByID(3677850622, vaultPath).then(($result: any) => {
+    return $Call.ByID(3684077406, vaultPath).then(($result: any) => {
         return $$createType3($result);
     });
 }
@@ -52,28 +52,28 @@ export function ListConfigItems(vaultPath: string): $CancellablePromise<$models.
  * OpenSyncBackupDir 使用系统文件管理器打开完整同步备份目录。
  */
 export function OpenSyncBackupDir(backupPath: string): $CancellablePromise<void> {
-    return $Call.ByID(63541684, backupPath);
+    return $Call.ByID(4158861140, backupPath);
 }
 
 /**
  * OpenVaultConfigDir 使用系统文件管理器打开 vault 的 .obsidian 配置目录。
  */
 export function OpenVaultConfigDir(vaultPath: string): $CancellablePromise<void> {
-    return $Call.ByID(132513533, vaultPath);
+    return $Call.ByID(2335796637, vaultPath);
 }
 
 /**
  * SaveLastVaultRoot 保存最近一次加载成功的 Vault 扫描根目录。
  */
 export function SaveLastVaultRoot(root: string): $CancellablePromise<void> {
-    return $Call.ByID(3256816299, root);
+    return $Call.ByID(2569725259, root);
 }
 
 /**
  * ScanVaults 扫描 root 并返回包含 .obsidian/ 的目录。
  */
 export function ScanVaults(root: string): $CancellablePromise<$models.VaultInfo[]> {
-    return $Call.ByID(4174715004, root).then(($result: any) => {
+    return $Call.ByID(1915577628, root).then(($result: any) => {
         return $$createType5($result);
     });
 }

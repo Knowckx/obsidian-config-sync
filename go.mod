@@ -1,4 +1,4 @@
-module obsi-conf-sync
+module obsidian-config-sync
 
 go 1.27.1
 

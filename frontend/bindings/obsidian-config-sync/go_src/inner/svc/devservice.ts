@@ -14,12 +14,12 @@ import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Cr
  * RemoveDirectory 删除开发预设生成的测试目录。
  */
 export function RemoveDirectory(): $CancellablePromise<void> {
-    return $Call.ByID(3354583982);
+    return $Call.ByID(2779208782);
 }
 
 /**
  * ResetTestCases 重建开发预设使用的测试目录。
  */
 export function ResetTestCases(): $CancellablePromise<void> {
-    return $Call.ByID(2499038255);
+    return $Call.ByID(2590320143);
 }

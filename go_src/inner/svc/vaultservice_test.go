@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"obsi-conf-sync/go_src/inner/svc"
+	"obsidian-config-sync/go_src/inner/svc"
 )
 
 func Test_ScanVaults(t *testing.T) {

@@ -3,7 +3,7 @@ package infa
 import (
 	"fmt"
 	"math"
-	"obsi-conf-sync/go_src/infa/ops"
+	"obsidian-config-sync/go_src/infa/ops"
 )
 
 // PeekStr 输出字符串长度和前缀预览。
@@ -76,4 +76,3 @@ func FmtAmountW(value float64) string {
 	}
 	return fmt.Sprintf("%.1f", value)
 }
-

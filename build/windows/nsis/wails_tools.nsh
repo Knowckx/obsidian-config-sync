@@ -5,16 +5,16 @@
 !include "FileFunc.nsh"
 
 !ifndef INFO_PROJECTNAME
-    !define INFO_PROJECTNAME "obsi-conf-sync"
+    !define INFO_PROJECTNAME "obsidian-config-sync"
 !endif
 !ifndef INFO_COMPANYNAME
     !define INFO_COMPANYNAME "knowckx"
 !endif
 !ifndef INFO_PRODUCTNAME
-    !define INFO_PRODUCTNAME "ob-conf-sync"
+    !define INFO_PRODUCTNAME "obsidian-config-sync"
 !endif
 !ifndef INFO_PRODUCTVERSION
-    !define INFO_PRODUCTVERSION "0.0.1"
+    !define INFO_PRODUCTVERSION "0.1.0-beta.1"
 !endif
 !ifndef INFO_COPYRIGHT
     !define INFO_COPYRIGHT "Copyright © 2026 knowckx"

@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"obsi-conf-sync/go_src/inner/svc"
+	"obsidian-config-sync/go_src/inner/svc"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
@@ -32,7 +32,7 @@ func main() {
 	// 'Bind' is a list of Go struct instances. The frontend has access to the methods of these instances.
 	// 'Mac' options tailor the application when running an macOS.
 	app := application.New(application.Options{
-		Name:        "obsi-conf-sync",
+		Name:        "obsidian-config-sync",
 		Description: "同步多个 Obsidian 库的配置",
 		Services: []application.Service{
 			application.NewService(&svc.VaultService{}),
@@ -42,7 +42,7 @@ func main() {
 			Handler: application.AssetFileServerFS(assets),
 		},
 		SingleInstance: &application.SingleInstanceOptions{
-			UniqueID: "app.obsi-conf-sync.desktop",
+			UniqueID: "app.obsidian-config-sync.desktop",
 			ExitCode: 0,
 			OnSecondInstanceLaunch: func(_ application.SecondInstanceData) {
 				if mainWindow == nil {

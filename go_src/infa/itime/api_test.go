@@ -2,7 +2,7 @@ package itime
 
 import (
 	"log"
-	"obsi-conf-sync/go_src/infa/ops"
+	"obsidian-config-sync/go_src/infa/ops"
 	"testing"
 )
 

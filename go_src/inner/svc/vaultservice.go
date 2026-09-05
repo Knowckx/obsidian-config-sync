@@ -10,8 +10,8 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"obsi-conf-sync/go_src/conf"
-	"obsi-conf-sync/go_src/inner/app_settings"
+	"obsidian-config-sync/go_src/conf"
+	"obsidian-config-sync/go_src/inner/app_settings"
 
 	"github.com/cockroachdb/errors"
 )

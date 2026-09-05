@@ -2,7 +2,7 @@ package template
 
 import (
 	"fmt"
-	"obsi-conf-sync/go_src/infa"
+	"obsidian-config-sync/go_src/infa"
 )
 
 // struct Template v1.0
@@ -45,6 +45,5 @@ func (t StudentMap) String() string {
 	msg := infa.PeekMap(t)
 	return msg
 }
-
 
 

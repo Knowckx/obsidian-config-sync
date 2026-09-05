@@ -8,7 +8,7 @@
         AllowPromptForPassword="false">
     </Settings>
     <Installer
-        Path="obsi-conf-sync.exe"
+        Path="obsidian-config-sync.exe"
         Arguments=""
         InstallLocation="C:\Program Files\My Company\My Product">
     </Installer>
@@ -18,7 +18,7 @@
         PublisherName="CN=My Company"
         PublisherDisplayName="My Company"
         Version="0.1.0.0"
-        PackageDescription="A obsi-conf-sync application">
+        PackageDescription="A obsidian-config-sync application">
         <Capabilities>
             <Capability Name="runFullTrust" />
             
@@ -26,9 +26,9 @@
         <Applications>
             <Application
                 Id="de.knowckx.obsiconfsync"
-                Description="A obsi-conf-sync application"
+                Description="A obsidian-config-sync application"
                 DisplayName="My Product"
-                ExecutableName="obsi-conf-sync.exe"
+                ExecutableName="obsidian-config-sync.exe"
                 EntryPoint="Windows.FullTrustApplication">
                 
             </Application>
@@ -43,11 +43,11 @@
             <Framework>false</Framework>
             <DisplayName>My Product</DisplayName>
             <PublisherDisplayName>My Company</PublisherDisplayName>
-            <Description>A obsi-conf-sync application</Description>
+            <Description>A obsidian-config-sync application</Description>
             <Logo>Assets\AppIcon.png</Logo>
         </Properties>
     </PackageInformation>
-    <SaveLocation PackagePath="obsi-conf-sync.msix" />
+    <SaveLocation PackagePath="obsidian-config-sync.msix" />
     <PackageIntegrity>
         <CertificatePath></CertificatePath>
     </PackageIntegrity>
